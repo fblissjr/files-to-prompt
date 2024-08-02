@@ -1,20 +1,24 @@
-# files-to-prompt
+# forked files-to-prompt
 
-[![PyPI](https://img.shields.io/pypi/v/files-to-prompt.svg)](https://pypi.org/project/files-to-prompt/)
-[![Changelog](https://img.shields.io/github/v/release/simonw/files-to-prompt?include_prereleases&label=changelog)](https://github.com/simonw/files-to-prompt/releases)
-[![Tests](https://github.com/simonw/files-to-prompt/actions/workflows/test.yml/badge.svg)](https://github.com/simonw/files-to-prompt/actions/workflows/test.yml)
-[![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](https://github.com/simonw/files-to-prompt/blob/master/LICENSE)
+Concatenate a directory full of files into a single prompt for use with LLMs, with enhanced support for Claude.
 
-Concatenate a directory full of files into a single prompt for use with LLMs
+For background on Simon's project see [Building files-to-prompt entirely using Claude 3 Opus](https://simonwillison.net/2024/Apr/8/files-to-prompt/).
 
-For background on this project see [Building files-to-prompt entirely using Claude 3 Opus](https://simonwillison.net/2024/Apr/8/files-to-prompt/).
+## Forked Changes
+
+- Added Claude-specific XML output formats
+- Introduced metadata support for documents
+- Improved file filtering options
 
 ## Installation
 
 Install this tool using `pip`:
+
 ```bash
-pip install files-to-prompt
+pip install git+https://github.com/your-username/files-to-prompt.git
 ```
+
+Replace `your-username` with your GitHub username where you've forked the repository.
 
 ## Usage
 
@@ -42,6 +46,26 @@ This will output the contents of every file, with each file preceded by its rela
   ```bash
   files-to-prompt path/to/directory --ignore "*.log" --ignore "temp*"
   ```
+
+- `--include <pattern>`: Specify one or more patterns to include. Can be used multiple times.
+  ```bash
+  files-to-prompt path/to/directory --include "*.py" --include "*.md"
+  ```
+
+- `--format <format>`: Specify the output format. Options are "default", "claude-xml", or "claude-xml-b64".
+  ```bash
+  files-to-prompt path/to/directory --format claude-xml
+  ```
+
+- `--metadata <key:value>`: Add metadata to the documents. Can be used multiple times.
+  ```bash
+  files-to-prompt path/to/directory --metadata "project:MyProject" --metadata "version:1.0"
+  ```
+
+### Claude-specific Options
+
+- `--format claude-xml`: Outputs the files in an XML format suitable for Claude.
+- `--format claude-xml-b64`: Similar to `claude-xml`, but encodes binary files in base64.
 
 ### Example
 
@@ -74,50 +98,35 @@ Contents of file3.txt
 ---
 ```
 
-If you run `files-to-prompt my_directory --include-hidden`, the output will also include `.hidden_file.txt`:
+If you run `files-to-prompt my_directory --include-hidden`, the output will also include `.hidden_file.txt`.
 
-```
-my_directory/.hidden_file.txt
----
-Contents of .hidden_file.txt
----
-...
-```
+If you run `files-to-prompt my_directory --ignore "*.log"`, the output will exclude `temp.log`.
 
-If you run `files-to-prompt my_directory --ignore "*.log"`, the output will exclude `temp.log`:
+### Claude XML Output Example
 
-```
-my_directory/file1.txt
----
+Running `files-to-prompt my_directory --format claude-xml` will output:
+
+```xml
+<documents>
+  <document index="0">
+    <source>my_directory/file1.txt</source>
+    <document_content>
 Contents of file1.txt
----
-my_directory/file2.txt
----
+    </document_content>
+  </document>
+  <document index="1">
+    <source>my_directory/file2.txt</source>
+    <document_content>
 Contents of file2.txt
----
-my_directory/subdirectory/file3.txt
----
+    </document_content>
+  </document>
+  <document index="2">
+    <source>my_directory/subdirectory/file3.txt</source>
+    <document_content>
 Contents of file3.txt
----
+    </document_content>
+  </document>
+</documents>
 ```
 
-## Development
-
-To contribute to this tool, first checkout the code. Then create a new virtual environment:
-
-```bash
-cd files-to-prompt
-python -m venv venv
-source venv/bin/activate
-```
-
-Now install the dependencies and test dependencies:
-
-```bash
-pip install -e '.[test]'
-```
-
-To run the tests:
-```bash
-pytest
-```
+This format is designed to be easily parsed by Claude for multi-document tasks.
