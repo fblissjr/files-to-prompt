@@ -15,10 +15,8 @@ For background on Simon's project see [Building files-to-prompt entirely using C
 Install this tool using `pip`:
 
 ```bash
-pip install git+https://github.com/your-username/files-to-prompt.git
+pip install -e .
 ```
-
-Replace `your-username` with your GitHub username where you've forked the repository.
 
 ## Usage
 
